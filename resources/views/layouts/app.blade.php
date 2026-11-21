@@ -103,14 +103,6 @@
                         <span class="text-muted">WhatsApp</span>
                         <a href="https://wa.me/{{ $adminContact['whatsapp'] }}" class="text-link num" target="_blank" rel="noopener">{{ $adminContact['phone'] }}</a>
                     </li>
-                    <li>
-                        <span class="text-muted">Telepon</span>
-                        <a href="tel:{{ $adminContact['phone'] }}" class="text-link num">{{ $adminContact['phone'] }}</a>
-                    </li>
-                    <li>
-                        <span class="text-muted">Email</span>
-                        <a href="mailto:{{ $adminContact['email'] }}" class="text-link break-all">{{ $adminContact['email'] }}</a>
-                    </li>
                 </ul>
             </div>
         </footer>
