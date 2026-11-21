@@ -5,17 +5,17 @@
 @php
     $menu = auth()->user()->isAdmin()
         ? [
-            ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Dashboard'],
             ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Verifikasi'],
             ['route' => 'admin.garages.index', 'active' => 'admin.garages.*', 'label' => 'Garasi'],
             ['route' => 'admin.rentals.index', 'active' => 'admin.rentals.*', 'label' => 'Sewa Aktif'],
             ['route' => 'admin.reports.index', 'active' => 'admin.reports.*', 'label' => 'Laporan'],
         ]
-        : [
-            ['route' => 'tenant.dashboard', 'active' => 'tenant.dashboard', 'label' => 'Dashboard'],
+        : (auth()->user()->isApproved() ? [
             ['route' => 'tenant.rentals.create', 'active' => 'tenant.rentals.create', 'label' => 'Sewa Garasi'],
-            ['route' => 'tenant.rentals.index', 'active' => ['tenant.rentals.index', 'tenant.rentals.show'], 'label' => 'Riwayat'],
-        ];
+            ['route' => 'tenant.rentals.index', 'active' => 'tenant.rentals.index', 'label' => 'Riwayat'],
+        ] : [
+            ['route' => 'tenant.status', 'active' => 'tenant.status', 'label' => 'Status Pendaftaran'],
+        ]);
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -33,7 +33,7 @@
 
     <header class="sticky top-0 z-40 border-b-2 border-ink bg-paper">
         <nav class="mx-auto flex min-h-16 max-w-app items-center gap-6 px-4 sm:px-6" aria-label="Menu utama">
-            <a href="{{ route('dashboard') }}" class="font-display text-lg font-bold tracking-tight text-ink no-underline" aria-label="Sewa Garasi, ke dashboard">Sewa Garasi</a>
+            <a href="{{ route('home') }}" class="font-display text-lg font-bold tracking-tight text-ink no-underline" aria-label="Sewa Garasi, ke halaman awal">Sewa Garasi</a>
 
             <ul class="hidden items-center gap-1 lg:flex">
                 @foreach ($menu as $item)
