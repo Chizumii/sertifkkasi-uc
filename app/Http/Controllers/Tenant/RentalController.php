@@ -25,13 +25,13 @@ use Illuminate\View\View;
 class RentalController extends Controller
 {
     /**
-     * Riwayat sewa milik penyewa.
+     * Riwayat sewa milik penyewa, lengkap dengan bukti bayar sewa dan perpanjangan.
      */
     public function index(Request $request): View
     {
         $rentals = Rental::query()
             ->ownedBy($request->user())
-            ->with(['garage', 'vehicle'])
+            ->with(['garage', 'vehicle', 'extensions'])
             ->latest('start_date')
             ->latest('id')
             ->paginate(10);
@@ -147,7 +147,7 @@ class RentalController extends Controller
         $remainingBattery = $request->filled('current_battery_kwh') ? $request->float('current_battery_kwh') : null;
         $totalCost = $garage->rentalCost($days, $rentalType) + $vehicle->chargingCost($garage, $remainingBattery);
 
-        $rental = Rental::create([
+        Rental::create([
             'garage_code' => $garage->id,
             'vehicle_id' => $vehicle->id,
             'rental_type' => $rentalType,
@@ -165,18 +165,8 @@ class RentalController extends Controller
         }
 
         return redirect()
-            ->route('tenant.rentals.show', $rental)
+            ->route('tenant.rentals.index')
             ->with('success', "Sewa garasi {$garage->id} berhasil disimpan.");
-    }
-
-    /**
-     * Detail sewa. Penyewa hanya boleh melihat sewa miliknya sendiri.
-     */
-    public function show(Request $request, Rental $rental): View
-    {
-        abort_if($rental->vehicle->tenant_id !== $request->user()->id, 403);
-
-        return view('tenant.rentals.show', ['rental' => $rental->load(['garage', 'vehicle', 'extensions'])]);
     }
 
     /**

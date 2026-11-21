@@ -85,7 +85,7 @@ class RegisterController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('tenant.dashboard')
+            ->route('tenant.status')
             ->with('success', 'Pendaftaran berhasil. Admin akan memverifikasi data Anda.');
     }
 }

@@ -11,30 +11,22 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 /**
- * Sewa untuk admin: daftar sewa aktif hari ini, detail, dan perpanjangan.
+ * Sewa untuk admin: tabel sewa aktif hari ini dan form perpanjangan.
  */
 class RentalController extends Controller
 {
     /**
-     * Sewa yang berjalan hari ini.
+     * Tabel sewa yang berjalan hari ini, lengkap dengan bukti bayar.
      */
     public function index(): View
     {
         $rentals = Rental::query()
             ->activeOn(today())
-            ->with(['garage', 'vehicle.tenant'])
+            ->with(['garage', 'vehicle.tenant', 'extensions'])
             ->orderBy('end_date')
             ->paginate(15);
 
         return view('admin.rentals.index', ['rentals' => $rentals]);
-    }
-
-    /**
-     * Detail sewa beserta data penyewa dan semua perpanjangan.
-     */
-    public function show(Rental $rental): View
-    {
-        return view('admin.rentals.show', ['rental' => $rental->load(['garage', 'vehicle.tenant', 'extensions.admin'])]);
     }
 
     /**
@@ -43,7 +35,7 @@ class RentalController extends Controller
     public function extend(Request $request, Rental $rental): View|RedirectResponse
     {
         if (! $rental->isActiveToday()) {
-            return redirect()->route('admin.rentals.show', $rental)
+            return redirect()->route('admin.rentals.index')
                 ->with('error', 'Hanya sewa yang aktif hari ini yang bisa diperpanjang.');
         }
 
@@ -111,7 +103,7 @@ class RentalController extends Controller
         $rental->update(['end_date' => $newEndDate->toDateString()]);
 
         return redirect()
-            ->route('admin.rentals.show', $rental)
+            ->route('admin.rentals.index')
             ->with('success', 'Sewa diperpanjang sampai '.$newEndDate->translatedFormat('j F Y').'.');
     }
 
