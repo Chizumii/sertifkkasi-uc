@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GarageType;
 use App\Enums\VehicleType;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,8 +21,6 @@ class Vehicle extends Model
     use HasFactory;
 
     /**
-     * Mendapatkan atribut yang perlu di-cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -43,12 +42,35 @@ class Vehicle extends Model
     }
 
     /**
-     * Riwayat sewa yang menggunakan kendaraan ini.
+     * Semua sewa yang memakai kendaraan ini.
      *
      * @return HasMany<Rental, $this>
      */
     public function rentals(): HasMany
     {
         return $this->hasMany(Rental::class);
+    }
+
+    /**
+     * Cek apakah kendaraan sudah diparkir di garasi lain pada tanggal $start sampai sebelum $end.
+     */
+    public function isBusy(mixed $start, mixed $end): bool
+    {
+        return $this->rentals()->overlapping($start, $end)->exists();
+    }
+
+    /**
+     * Biaya isi baterai sampai penuh: (kapasitas - sisa baterai) x harga per kWh.
+     * Hanya untuk mobil listrik yang parkir di garasi mobil listrik; selain itu 0.
+     */
+    public function chargingCost(Garage $garage, ?float $remainingKwh): int
+    {
+        if ($this->type !== VehicleType::ElectricCar || $garage->type !== GarageType::Electric) {
+            return 0;
+        }
+
+        $kwhToCharge = (float) $this->battery_kwh - (float) $remainingKwh;
+
+        return (int) round($kwhToCharge * $garage->kwh_rate);
     }
 }

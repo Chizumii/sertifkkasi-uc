@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\GarageStatus;
 use App\Enums\GarageType;
+use App\Enums\RentalType;
 use Database\Factories\GarageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Garasi yang disewakan. Primary key id berisi kode garasi: S001 (sepeda), C001 (mobil), atau E001 (mobil listrik).
+ * Garasi yang disewakan. Kolom id berisi kode garasi, misalnya S001 (sepeda), C001 (mobil), E001 (mobil listrik).
  */
 #[Fillable(['id', 'type', 'daily_rate', 'kwh_rate', 'status'])]
 class Garage extends Model
@@ -22,27 +23,28 @@ class Garage extends Model
     use HasFactory;
 
     /**
-     * Kelipatan harga harian untuk menentukan harga sewa bulanan.
+     * Harga sewa bulanan = 25 x harga harian.
      */
     public const int MONTHLY_PRICE_MULTIPLIER = 25;
 
     /**
-     * Primary key berupa kode garasi, bukan angka berurutan.
+     * Nomor kode garasi paling besar per tipe (S999, C999, E999).
+     */
+    public const int MAX_NUMBER = 999;
+
+    /**
+     * Primary key berupa kode garasi (teks), bukan angka berurutan.
      *
      * @var bool
      */
     public $incrementing = false;
 
     /**
-     * Tipe primary key.
-     *
      * @var string
      */
     protected $keyType = 'string';
 
     /**
-     * Mendapatkan atribut yang perlu di-cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -56,7 +58,7 @@ class Garage extends Model
     }
 
     /**
-     * Riwayat sewa pada garasi ini.
+     * Semua sewa di garasi ini.
      *
      * @return HasMany<Rental, $this>
      */
@@ -66,7 +68,7 @@ class Garage extends Model
     }
 
     /**
-     * Harga sewa bulanan, yaitu 25 x harga harian.
+     * Harga sewa satu bulan.
      */
     public function monthlyPrice(): int
     {
@@ -74,7 +76,56 @@ class Garage extends Model
     }
 
     /**
-     * Membatasi query hanya pada garasi dengan tipe tertentu.
+     * Biaya sewa garasi: bulanan = harga bulanan, harian = jumlah hari x harga harian.
+     */
+    public function rentalCost(int $days, RentalType $type): int
+    {
+        if ($type === RentalType::Monthly) {
+            return $this->monthlyPrice();
+        }
+
+        return $days * $this->daily_rate;
+    }
+
+    /**
+     * Cek apakah garasi kosong pada tanggal $start sampai sebelum $end.
+     * $exceptRentalId dipakai saat perpanjangan, supaya sewa yang sedang diperpanjang tidak dihitung bentrok.
+     */
+    public function isFree(mixed $start, mixed $end, ?int $exceptRentalId = null): bool
+    {
+        $query = $this->rentals()->overlapping($start, $end);
+
+        if ($exceptRentalId !== null) {
+            $query->where('id', '!=', $exceptRentalId);
+        }
+
+        return $query->doesntExist();
+    }
+
+    /**
+     * Nomor kode tertinggi yang sudah dipakai untuk satu tipe. Contoh: ada C001-C009 maka hasilnya 9.
+     */
+    public static function highestNumber(GarageType $type): int
+    {
+        $highestCode = self::query()->where('type', $type)->max('id');
+
+        if ($highestCode === null) {
+            return 0;
+        }
+
+        return (int) substr($highestCode, 1);
+    }
+
+    /**
+     * Menyusun kode garasi dari tipe dan nomor. Contoh: (Electric, 6) menjadi E006.
+     */
+    public static function makeCode(GarageType $type, int $number): string
+    {
+        return $type->codePrefix().str_pad((string) $number, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Filter garasi berdasarkan tipe.
      *
      * @param  Builder<Garage>  $query
      */

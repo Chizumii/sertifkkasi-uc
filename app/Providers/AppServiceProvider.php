@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,10 +16,10 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Menyiapkan layanan aplikasi: nama bulan dan hari Carbon memakai bahasa Indonesia.
      */
     public function boot(): void
     {
-        //
+        Carbon::setLocale('id');
     }
 }

@@ -1,9 +1,531 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Terrazzo (deal 3/3, seed vehicle-garage-rental-web-7106·8503ce76·2026-11-21·r1)
+ * nav: top bar, role menu, disclosure under 64rem · signature: the garage catalogue by code, S/C/E codes in JetBrains Mono on ink-ruled spec tables · states: empty, error, disabled, busy · terrazzo: off-white
+ * axes: light/geometric-sans/warm · posture: restrained · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: S, an admin table app shares its bones with every admin; the garage code as a catalogue spec and the ruled paid ticket carry the identity */
+/* Hallmark · dismissed 28a · the payment proof image sits in the rental aside, below the fold on a phone, never the LCP */
+/* Hallmark · dismissed 49 · flagged labels are Blade expressions such as routeIs and slot echoes, real nav labels are one or two words */
+/* Hallmark · dismissed F1 · flagged quotes are Blade attribute syntax and template comments, not visible prose */
+/* Hallmark · dismissed F2 · flagged periods are the PHP spread operator in the status and garage filter loops */
+
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Palet Terrazzo: kertas off-white, tinta hampir hitam, kartu putih bergaris tinta, karat satu-satunya sinyal. */
+    --color-*: initial;
+    --color-paper: oklch(96% 0.009 82);
+    --color-paper-2: oklch(92% 0.012 82);
+    --color-paper-3: oklch(87.5% 0.014 80);
+    --color-surface: oklch(99.5% 0.003 82);
+    --color-ink: oklch(16% 0.006 60);
+    --color-ink-2: oklch(27% 0.006 60);
+    --color-muted: oklch(46% 0.01 60);
+    --color-rule: oklch(81% 0.012 80);
+    --color-rule-strong: oklch(16% 0.006 60);
+    --color-accent: oklch(53% 0.15 38);
+    --color-accent-deep: oklch(44% 0.13 38);
+    --color-accent-soft: oklch(91% 0.035 45);
+    --color-accent-ink: oklch(99.5% 0.003 82);
+    --color-focus: oklch(50% 0.16 38);
+    --color-error: oklch(47% 0.19 25);
+    --color-error-soft: oklch(94% 0.03 25);
+
+    --font-*: initial;
+    --font-body: 'Onest', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+    /* Skala tipe aplikasi, rasio 1.2 dari 16px. */
+    --text-*: initial;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: 1.45;
+    --text-base: 1rem;
+    --text-base--line-height: 1.5;
+    --text-lg: 1.2rem;
+    --text-lg--line-height: 1.3;
+    --text-xl: 1.44rem;
+    --text-xl--line-height: 1.15;
+    --text-2xl: 1.728rem;
+    --text-2xl--line-height: 1.05;
+    --text-3xl: 2.074rem;
+    --text-3xl--line-height: 1;
+
+    --radius-input: 0;
+    --radius-card: 0;
+    --radius-pill: 0;
+
+    --shadow-*: initial;
+    --shadow-card: 10px 10px 0 oklch(87.5% 0.014 80);
+    --shadow-lift: 10px 10px 0 oklch(87.5% 0.014 80);
+    --shadow-ink: 10px 10px 0 oklch(16% 0.006 60);
+
+    --container-app: 74rem;
+    --container-narrow: 30rem;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --tracking-display: -0.025em;
+}
+
+@layer base {
+    :root {
+        color-scheme: light;
+        --dur-micro: 120ms;
+        --dur-short: 220ms;
+    }
+
+    html,
+    body {
+        overflow-x: clip;
+    }
+
+    html {
+        scrollbar-color: var(--color-muted) var(--color-paper);
+    }
+
+    body {
+        background: var(--color-paper);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: 1.5;
+        font-synthesis: none;
+        caret-color: var(--color-accent);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--color-accent) 25%, transparent);
+        color: var(--color-ink);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    h1,
+    h2,
+    h3 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: var(--tracking-display);
+        overflow-wrap: break-word;
+        min-width: 0;
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+    }
+
+    summary {
+        cursor: pointer;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+
+    .num {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer components {
+    /* Tombol persegi: tinta terisi untuk aksi utama, garis tinta 2px untuk yang lain. */
+    .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 2.5rem;
+        padding: 0 1rem;
+        border: 0;
+        border-radius: 0;
+        font: 500 var(--text-base) / 1 var(--font-body);
+        white-space: nowrap;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color var(--dur-short) var(--ease-out),
+            color var(--dur-short) var(--ease-out);
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+    }
+
+    .btn:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    .btn:disabled,
+    .btn[aria-disabled='true'] {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .btn[aria-busy='true'] {
+        cursor: progress;
+    }
+
+    .btn-primary {
+        background: var(--color-ink);
+        color: var(--color-paper);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--color-ink);
+        box-shadow: inset 0 0 0 2px var(--color-ink);
+    }
+
+    .btn-danger {
+        background: transparent;
+        color: var(--color-error);
+        box-shadow: inset 0 0 0 2px var(--color-error);
+    }
+
+    @media (hover: hover) {
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-ink-2);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--color-paper-2);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--color-error-soft);
+        }
+    }
+
+    /* Field persegi di atas warna plate dengan garis tinta 1px. */
+    .field {
+        display: block;
+        width: 100%;
+        min-height: 2.5rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-ink);
+        border-radius: 0;
+        background: var(--color-surface);
+        color: var(--color-ink);
+        font-size: var(--text-base);
+        outline: 2px solid transparent;
+        outline-offset: -3px;
+        transition: background-color var(--dur-short) var(--ease-out);
+    }
+
+    .field::placeholder {
+        color: var(--color-muted);
+    }
+
+    .field:focus-visible {
+        outline-color: var(--color-focus);
+    }
+
+    .field[aria-invalid='true'] {
+        border-color: var(--color-error);
+        box-shadow: inset 0 0 0 1px var(--color-error);
+    }
+
+    .field[readonly] {
+        background: var(--color-paper-2);
+        cursor: default;
+    }
+
+    .field:disabled {
+        background: var(--color-paper-2);
+        color: var(--color-muted);
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    @media (hover: hover) {
+        .field:hover:not(:disabled, [readonly]) {
+            background: var(--color-paper);
+        }
+    }
+
+    /* Sel pilihan persegi: terpilih mendapat garis tinta tebal dan latar karat lembut. */
+    .key-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .key {
+        display: block;
+        height: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--color-ink);
+        background: var(--color-surface);
+        cursor: pointer;
+        transition: background-color var(--dur-short) var(--ease-out);
+    }
+
+    @media (hover: hover) {
+        .key:hover {
+            background: var(--color-paper);
+        }
+    }
+
+    .key-input:checked + .key {
+        background: var(--color-accent-soft);
+        box-shadow: inset 0 0 0 2px var(--color-ink);
+    }
+
+    .key-input:checked + .key .font-mono {
+        color: var(--color-accent-deep);
+    }
+
+    .key-input:focus-visible + .key {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    .key-input:disabled + .key {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    /* Tiket garasi: kartu plate bergaris tinta dengan bayangan offset dan cap karat "Lunas". */
+    .ticket {
+        position: relative;
+        border: 2px solid var(--color-ink);
+        background: var(--color-surface);
+        box-shadow: var(--shadow-card);
+        transition: box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    @media (hover: hover) {
+        .ticket:has(a:hover) {
+            box-shadow: var(--shadow-ink);
+        }
+    }
+
+    .ticket-stub {
+        border-top: 1px dashed var(--color-ink);
+    }
+
+    .stamp {
+        display: inline-block;
+        padding: 0.25rem 0.625rem;
+        border: 2px solid var(--color-accent);
+        color: var(--color-accent-deep);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        line-height: 1.3;
+        transform: rotate(-2deg);
+    }
+
+    /* Tabel spesifikasi: garis tinta 2px di atas, garis tipis antar baris, baris disorot karat lembut. */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 2px solid var(--color-ink);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .data-table th {
+        padding: 0.625rem 0.75rem;
+        border-bottom: 1px solid var(--color-ink);
+        color: var(--color-muted);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--color-rule);
+        vertical-align: top;
+    }
+
+    .data-table :is(th, td):first-child {
+        position: sticky;
+        left: 0;
+        padding-left: 0;
+        background: var(--color-paper);
+    }
+
+    .data-table :is(th, td):last-child {
+        padding-right: 0;
+    }
+
+    @media (hover: hover) {
+        .data-table tbody tr:hover > td {
+            background: var(--color-accent-soft);
+        }
+
+        .data-table tbody tr:hover > td.font-mono:first-child {
+            color: var(--color-accent-deep);
+        }
+    }
+
+    .data-table tfoot td {
+        border-top: 2px solid var(--color-ink);
+        border-bottom: 0;
+        font-weight: 500;
+    }
+
+    /* Tab filter: sel persegi bersambung, yang aktif tinta dengan teks kertas. */
+    .tab {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.5rem;
+        margin-right: -1px;
+        padding: 0 0.875rem;
+        border: 1px solid var(--color-ink);
+        color: var(--color-ink);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color var(--dur-short) var(--ease-out);
+    }
+
+    .tab[aria-current='page'] {
+        background: var(--color-ink);
+        color: var(--color-paper);
+    }
+
+    @media (hover: hover) {
+        .tab:not([aria-current='page']):hover {
+            background: var(--color-paper-2);
+        }
+    }
+
+    /*
+     * Tata letak dua kolom (x-split-layout). Kolom kiri sticky di layar lebar; bila lebih tinggi dari layar
+     * ia di-scroll sendiri. Padding kanan/bawah memberi ruang bayangan offset kartu (10px) dan outline fokus
+     * agar tidak terpotong oleh overflow.
+     */
+    .split-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    @media (width >= 64rem) {
+        .split-layout {
+            grid-template-columns: var(--split-aside) minmax(0, 1fr);
+        }
+
+        .split-aside {
+            position: sticky;
+            top: 5.5rem;
+            max-height: calc(100dvh - 7rem);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            margin: -0.25rem;
+            padding: 0.25rem 0.875rem 0.875rem 0.25rem;
+            scrollbar-width: thin;
+        }
+    }
+
+    /* Tab bertumpuk untuk kolom aksi: sel selebar kolom, bersambung ke bawah, teks boleh turun baris. */
+    .tab-stack .tab {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.125rem 0.75rem;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: -1px;
+        padding-block: 0.5rem;
+        white-space: normal;
+    }
+
+    .tab-stack .tab[aria-current='page'] .text-muted {
+        color: var(--color-paper-3);
+    }
+
+    /* Dialog konfirmasi: kartu plate bergaris tinta dengan bayangan tinta di atas latar redup. */
+    .confirm-dialog {
+        width: min(28rem, calc(100vw - 2rem));
+        margin: auto;
+        padding: 1.5rem;
+        border: 2px solid var(--color-ink);
+        background: var(--color-surface);
+        color: var(--color-ink);
+        box-shadow: var(--shadow-ink);
+    }
+
+    .confirm-dialog::backdrop {
+        background: color-mix(in oklab, var(--color-ink) 45%, transparent);
+    }
+
+    .confirm-dialog[open] {
+        animation: confirm-dialog-in var(--dur-short) var(--ease-out);
+    }
+
+    @keyframes confirm-dialog-in {
+        from {
+            opacity: 0;
+            transform: translateY(0.5rem);
+        }
+    }
+
+    .nav-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.5rem;
+        padding: 0 0.75rem;
+        color: var(--color-ink-2);
+        text-decoration: none;
+        transition: background-color var(--dur-short) var(--ease-out);
+    }
+
+    .nav-link[aria-current='page'] {
+        color: var(--color-ink);
+        box-shadow: inset 0 -2px 0 var(--color-accent);
+    }
+
+    @media (hover: hover) {
+        .nav-link:not([aria-current='page']):hover {
+            background: var(--color-paper-2);
+        }
+    }
+
+    .text-link {
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-decoration-color: var(--color-ink);
+        transition: text-decoration-color var(--dur-short) var(--ease-out);
+    }
+
+    @media (hover: hover) {
+        .text-link:hover {
+            text-decoration-color: var(--color-accent);
+        }
+    }
+
+    @media (pointer: coarse) {
+        .btn,
+        .field,
+        .tab,
+        .nav-link {
+            min-height: 2.75rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }

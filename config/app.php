@@ -65,7 +65,24 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Contact
+    |--------------------------------------------------------------------------
+    |
+    | Kontak admin yang ditampilkan di footer halaman penyewa. Nomor WhatsApp
+    | ditulis dalam format internasional tanpa tanda plus, misalnya 6281200000001.
+    |
+    */
+
+    'admin_contact' => [
+        'email' => env('ADMIN_CONTACT_EMAIL', 'admin@garasi.test'),
+        'phone' => env('ADMIN_CONTACT_PHONE', '081200000001'),
+        'whatsapp' => env('ADMIN_CONTACT_WHATSAPP', '6281200000001'),
+        'hours' => env('ADMIN_CONTACT_HOURS', 'Senin sampai Sabtu, 08.00 sampai 17.00 WIB'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

@@ -76,14 +76,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Menentukan apakah pengguna adalah penyewa.
-     */
-    public function isTenant(): bool
-    {
-        return $this->role === UserRole::Tenant;
-    }
-
-    /**
      * Menentukan apakah pendaftaran pengguna sudah diterima admin.
      */
     public function isApproved(): bool

@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\RentalStatus;
 use App\Enums\RentalType;
 use Database\Factories\RentalFactory;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +17,7 @@ use Illuminate\Support\Carbon;
 /**
  * Transaksi sewa garasi. Penyewa diambil lewat kendaraan (vehicles.tenant_id).
  *
- * Kolom end_date bersifat eksklusif (sewa 3 hari mulai tanggal 1 berakhir tanggal 4).
+ * end_date tidak ikut dihitung: sewa 3 hari mulai tanggal 1 berakhir tanggal 4.
  * total_cost sudah termasuk biaya isi listrik untuk mobil listrik di garasi listrik.
  */
 #[Fillable([
@@ -45,8 +44,6 @@ class Rental extends Model
     public $timestamps = false;
 
     /**
-     * Mendapatkan atribut yang perlu di-cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -92,7 +89,56 @@ class Rental extends Model
     }
 
     /**
-     * Membatasi query pada sewa milik penyewa tertentu (lewat kendaraannya).
+     * Cek apakah sewa sedang berjalan hari ini.
+     */
+    public function isActiveToday(): bool
+    {
+        return $this->start_date->lte(today()) && $this->end_date->gt(today());
+    }
+
+    /**
+     * Rincian biaya perpanjangan dari tanggal selesai lama sampai $newEndDate.
+     *
+     * - Hari tambahan kurang dari jumlah hari di bulan tanggal selesai lama: harian (hari x harga harian).
+     * - Selain itu bulanan: dihitung per bulan mulai dari tanggal selesai lama (bulan x 25 x harga harian).
+     *
+     * @return array{old_end_date: string, new_end_date: string, extension_days: int, rental_type_label: string, months: int|null, daily_rate: int, additional_cost: int}
+     */
+    public function extensionPreview(Carbon $newEndDate): array
+    {
+        $oldEndDate = $this->end_date->copy()->startOfDay();
+        $newEndDate = $newEndDate->copy()->startOfDay();
+        $dailyRate = $this->garage->daily_rate;
+        $extensionDays = (int) $oldEndDate->diffInDays($newEndDate);
+
+        if ($extensionDays < $oldEndDate->daysInMonth) {
+            $type = RentalType::Daily;
+            $months = null;
+            $cost = $extensionDays * $dailyRate;
+        } else {
+            $type = RentalType::Monthly;
+            $months = 0;
+            $date = $oldEndDate->copy();
+            while ($date->lt($newEndDate)) {
+                $date->addDays($date->daysInMonth);
+                $months++;
+            }
+            $cost = $months * Garage::MONTHLY_PRICE_MULTIPLIER * $dailyRate;
+        }
+
+        return [
+            'old_end_date' => $oldEndDate->toDateString(),
+            'new_end_date' => $newEndDate->toDateString(),
+            'extension_days' => $extensionDays,
+            'rental_type_label' => $type->label(),
+            'months' => $months,
+            'daily_rate' => $dailyRate,
+            'additional_cost' => $cost,
+        ];
+    }
+
+    /**
+     * Filter sewa milik penyewa tertentu (lewat kendaraannya).
      *
      * @param  Builder<Rental>  $query
      */
@@ -103,28 +149,25 @@ class Rental extends Model
     }
 
     /**
-     * Membatasi query pada sewa yang bentrok dengan rentang tanggal [start, end).
-     *
-     * Dua rentang bentrok bila start < end_lain DAN end > start_lain.
-     * Pembanding dikirim sebagai Carbon awal hari agar diformat sama dengan cara cast date menyimpan
-     * kolom (SQLite menyimpan "Y-m-d 00:00:00", MySQL kolom DATE), sehingga hasilnya sama di kedua database.
+     * Filter sewa yang bentrok dengan tanggal $start sampai sebelum $end.
+     * Dua periode bentrok bila: start < end_lain DAN end > start_lain.
      *
      * @param  Builder<Rental>  $query
      */
     #[Scope]
-    protected function overlapping(Builder $query, DateTimeInterface|string $start, DateTimeInterface|string $end): void
+    protected function overlapping(Builder $query, mixed $start, mixed $end): void
     {
         $query->where('start_date', '<', Carbon::parse($end)->startOfDay())
             ->where('end_date', '>', Carbon::parse($start)->startOfDay());
     }
 
     /**
-     * Membatasi query pada sewa yang aktif pada tanggal tertentu (start_date <= tanggal < end_date).
+     * Filter sewa yang berjalan pada tanggal tertentu (start_date <= tanggal < end_date).
      *
      * @param  Builder<Rental>  $query
      */
     #[Scope]
-    protected function activeOn(Builder $query, DateTimeInterface|string $date): void
+    protected function activeOn(Builder $query, mixed $date): void
     {
         $day = Carbon::parse($date)->startOfDay();
 
