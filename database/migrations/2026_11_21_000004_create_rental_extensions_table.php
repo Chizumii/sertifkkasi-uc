@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('rental_extensions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('admin_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('rental_id')->constrained()->cascadeOnDelete();
-            $table->date('old_end_date');
+            $table->date('previous_end_date');
             $table->date('new_end_date');
-            $table->decimal('additional_cost', 12, 2);
+            $table->unsignedInteger('remaining_cost');
             $table->string('payment_proof');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 

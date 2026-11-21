@@ -9,13 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Catatan perpanjangan sewa: perubahan tanggal selesai, biaya tambahan, dan bukti bayar.
+ * Catatan perpanjangan sewa oleh admin: tanggal selesai lama dan baru, biaya tambahan, dan bukti bayar.
  */
-#[Fillable(['rental_id', 'old_end_date', 'new_end_date', 'additional_cost', 'payment_proof'])]
+#[Fillable(['admin_id', 'rental_id', 'previous_end_date', 'new_end_date', 'remaining_cost', 'payment_proof'])]
 class RentalExtension extends Model
 {
     /** @use HasFactory<RentalExtensionFactory> */
     use HasFactory;
+
+    /**
+     * Tabel rental_extensions hanya punya created_at.
+     */
+    public const UPDATED_AT = null;
 
     /**
      * Mendapatkan atribut yang perlu di-cast.
@@ -25,9 +30,9 @@ class RentalExtension extends Model
     protected function casts(): array
     {
         return [
-            'old_end_date' => 'date',
+            'previous_end_date' => 'date',
             'new_end_date' => 'date',
-            'additional_cost' => 'decimal:2',
+            'remaining_cost' => 'integer',
         ];
     }
 
@@ -39,5 +44,15 @@ class RentalExtension extends Model
     public function rental(): BelongsTo
     {
         return $this->belongsTo(Rental::class);
+    }
+
+    /**
+     * Admin yang mencatat perpanjangan.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }

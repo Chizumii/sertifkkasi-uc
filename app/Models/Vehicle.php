@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Kendaraan milik penyewa (sepeda, sepeda motor, mobil, atau mobil listrik).
  */
-#[Fillable(['user_id', 'type', 'plate_number', 'brand_model', 'battery_capacity_kwh'])]
+#[Fillable(['tenant_id', 'type', 'license_plate', 'brand_model', 'battery_kwh'])]
 class Vehicle extends Model
 {
     /** @use HasFactory<VehicleFactory> */
@@ -28,7 +28,7 @@ class Vehicle extends Model
     {
         return [
             'type' => VehicleType::class,
-            'battery_capacity_kwh' => 'decimal:2',
+            'battery_kwh' => 'decimal:2',
         ];
     }
 
@@ -37,9 +37,9 @@ class Vehicle extends Model
      *
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'tenant_id');
     }
 
     /**

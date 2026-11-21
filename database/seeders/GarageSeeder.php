@@ -15,12 +15,12 @@ class GarageSeeder extends Seeder
     /**
      * Daftar kelompok garasi demo per tipe.
      *
-     * @var list<array{type: GarageType, count: int, daily_price: int, kwh_price: int|null}>
+     * @var list<array{type: GarageType, count: int, daily_rate: int, kwh_rate: int|null}>
      */
     private const array GARAGE_GROUPS = [
-        ['type' => GarageType::Bike, 'count' => 10, 'daily_price' => 10000, 'kwh_price' => null],
-        ['type' => GarageType::Car, 'count' => 10, 'daily_price' => 50000, 'kwh_price' => null],
-        ['type' => GarageType::Electric, 'count' => 5, 'daily_price' => 75000, 'kwh_price' => 2500],
+        ['type' => GarageType::Bicycle, 'count' => 10, 'daily_rate' => 10000, 'kwh_rate' => null],
+        ['type' => GarageType::Car, 'count' => 10, 'daily_rate' => 50000, 'kwh_rate' => null],
+        ['type' => GarageType::Electric, 'count' => 5, 'daily_rate' => 75000, 'kwh_rate' => 2500],
     ];
 
     /**
@@ -33,11 +33,11 @@ class GarageSeeder extends Seeder
         foreach (self::GARAGE_GROUPS as $group) {
             for ($sequence = 1; $sequence <= $group['count']; $sequence++) {
                 Garage::query()->firstOrCreate(
-                    ['code' => $group['type']->codePrefix().str_pad((string) $sequence, 3, '0', STR_PAD_LEFT)],
+                    ['id' => $group['type']->codePrefix().str_pad((string) $sequence, 3, '0', STR_PAD_LEFT)],
                     [
                         'type' => $group['type'],
-                        'daily_price' => $group['daily_price'],
-                        'kwh_price' => $group['kwh_price'],
+                        'daily_rate' => $group['daily_rate'],
+                        'kwh_rate' => $group['kwh_rate'],
                         'status' => GarageStatus::Available,
                     ],
                 );

@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Garasi yang disewakan, dengan kode S001 (sepeda), C001 (mobil), atau E001 (mobil listrik).
+ * Garasi yang disewakan. Primary key id berisi kode garasi: S001 (sepeda), C001 (mobil), atau E001 (mobil listrik).
  */
-#[Fillable(['code', 'type', 'daily_price', 'kwh_price', 'status'])]
+#[Fillable(['id', 'type', 'daily_rate', 'kwh_rate', 'status'])]
 class Garage extends Model
 {
     /** @use HasFactory<GarageFactory> */
@@ -27,6 +27,20 @@ class Garage extends Model
     public const int MONTHLY_PRICE_MULTIPLIER = 25;
 
     /**
+     * Primary key berupa kode garasi, bukan angka berurutan.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * Tipe primary key.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
      * Mendapatkan atribut yang perlu di-cast.
      *
      * @return array<string, string>
@@ -36,8 +50,8 @@ class Garage extends Model
         return [
             'type' => GarageType::class,
             'status' => GarageStatus::class,
-            'daily_price' => 'decimal:2',
-            'kwh_price' => 'decimal:2',
+            'daily_rate' => 'integer',
+            'kwh_rate' => 'integer',
         ];
     }
 
@@ -48,15 +62,15 @@ class Garage extends Model
      */
     public function rentals(): HasMany
     {
-        return $this->hasMany(Rental::class);
+        return $this->hasMany(Rental::class, 'garage_code');
     }
 
     /**
      * Harga sewa bulanan, yaitu 25 x harga harian.
      */
-    public function monthlyPrice(): string
+    public function monthlyPrice(): int
     {
-        return number_format((float) $this->daily_price * self::MONTHLY_PRICE_MULTIPLIER, 2, '.', '');
+        return $this->daily_rate * self::MONTHLY_PRICE_MULTIPLIER;
     }
 
     /**

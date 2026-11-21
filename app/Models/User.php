@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
@@ -10,21 +9,29 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
  * Pengguna aplikasi, berperan sebagai admin atau penyewa.
  *
- * Kolom role dan status sengaja tidak fillable agar tidak bisa diubah
+ * Kolom role dan verification_status sengaja tidak fillable agar tidak bisa diubah
  * lewat mass assignment dari input pengguna.
  */
-#[Fillable(['nik', 'name', 'phone', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['nik', 'email', 'full_name', 'phone_number', 'password'])]
+#[Hidden(['password'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Tabel users tidak punya kolom remember_token, jadi fitur "ingat saya" tidak dipakai.
+     *
+     * @var string
+     */
+    protected $rememberTokenName = '';
 
     /**
      * Mendapatkan atribut yang perlu di-cast.
@@ -34,10 +41,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
-            'status' => UserStatus::class,
+            'verification_status' => UserStatus::class,
         ];
     }
 
@@ -48,17 +54,17 @@ class User extends Authenticatable
      */
     public function vehicles(): HasMany
     {
-        return $this->hasMany(Vehicle::class);
+        return $this->hasMany(Vehicle::class, 'tenant_id');
     }
 
     /**
-     * Riwayat sewa garasi milik penyewa.
+     * Riwayat sewa garasi milik penyewa, lewat kendaraannya.
      *
-     * @return HasMany<Rental, $this>
+     * @return HasManyThrough<Rental, Vehicle, $this>
      */
-    public function rentals(): HasMany
+    public function rentals(): HasManyThrough
     {
-        return $this->hasMany(Rental::class);
+        return $this->hasManyThrough(Rental::class, Vehicle::class, 'tenant_id');
     }
 
     /**
@@ -82,6 +88,6 @@ class User extends Authenticatable
      */
     public function isApproved(): bool
     {
-        return $this->status === UserStatus::Approved;
+        return $this->verification_status === UserStatus::Approved;
     }
 }

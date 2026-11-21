@@ -7,17 +7,17 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Membuat tabel vehicles untuk kendaraan milik penyewa.
+     * Membuat tabel vehicles milik penyewa (tenant_id).
      */
     public function up(): void
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['bicycle', 'motorcycle', 'car', 'electric_car']);
-            $table->string('plate_number', 15)->nullable()->unique();
+            $table->foreignId('tenant_id')->constrained('users')->cascadeOnDelete();
+            $table->enum('type', ['bicycle', 'motorcycle', 'car', 'electricCar']);
+            $table->string('license_plate', 15)->nullable()->unique();
             $table->string('brand_model');
-            $table->decimal('battery_capacity_kwh', 8, 2)->nullable();
+            $table->decimal('battery_kwh', 8, 2)->nullable();
             $table->timestamps();
         });
     }

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RentalStatus;
 use App\Enums\RentalType;
-use App\Enums\VehicleType;
 use Database\Factories\RentalFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,36 +16,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * Transaksi sewa garasi.
+ * Transaksi sewa garasi. Penyewa diambil lewat kendaraan (vehicles.tenant_id).
  *
- * Data kendaraan dan harga disimpan sebagai snapshot saat sewa dibuat.
  * Kolom end_date bersifat eksklusif (sewa 3 hari mulai tanggal 1 berakhir tanggal 4).
+ * total_cost sudah termasuk biaya isi listrik untuk mobil listrik di garasi listrik.
  */
 #[Fillable([
-    'user_id',
-    'garage_id',
+    'garage_code',
     'vehicle_id',
-    'vehicle_type',
-    'plate_number',
-    'brand_model',
-    'battery_capacity_kwh',
-    'current_battery_kwh',
     'rental_type',
-    'days',
+    'days_count',
     'start_date',
     'end_date',
-    'daily_price',
-    'kwh_price',
-    'rental_cost',
-    'charging_kwh',
-    'charging_cost',
     'total_cost',
     'payment_proof',
+    'status',
 ])]
 class Rental extends Model
 {
     /** @use HasFactory<RentalFactory> */
     use HasFactory;
+
+    /**
+     * Tabel rentals tidak punya kolom created_at/updated_at.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Mendapatkan atribut yang perlu di-cast.
@@ -55,30 +52,13 @@ class Rental extends Model
     protected function casts(): array
     {
         return [
-            'vehicle_type' => VehicleType::class,
             'rental_type' => RentalType::class,
-            'days' => 'integer',
+            'status' => RentalStatus::class,
+            'days_count' => 'integer',
             'start_date' => 'date',
             'end_date' => 'date',
-            'battery_capacity_kwh' => 'decimal:2',
-            'current_battery_kwh' => 'decimal:2',
-            'charging_kwh' => 'decimal:2',
-            'daily_price' => 'decimal:2',
-            'kwh_price' => 'decimal:2',
-            'rental_cost' => 'decimal:2',
-            'charging_cost' => 'decimal:2',
-            'total_cost' => 'decimal:2',
+            'total_cost' => 'integer',
         ];
-    }
-
-    /**
-     * Penyewa yang melakukan sewa.
-     *
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     /**
@@ -88,11 +68,11 @@ class Rental extends Model
      */
     public function garage(): BelongsTo
     {
-        return $this->belongsTo(Garage::class);
+        return $this->belongsTo(Garage::class, 'garage_code');
     }
 
     /**
-     * Kendaraan asal snapshot; bisa null bila kendaraan sudah dihapus.
+     * Kendaraan yang diparkir.
      *
      * @return BelongsTo<Vehicle, $this>
      */
@@ -109,6 +89,17 @@ class Rental extends Model
     public function extensions(): HasMany
     {
         return $this->hasMany(RentalExtension::class);
+    }
+
+    /**
+     * Membatasi query pada sewa milik penyewa tertentu (lewat kendaraannya).
+     *
+     * @param  Builder<Rental>  $query
+     */
+    #[Scope]
+    protected function ownedBy(Builder $query, User $tenant): void
+    {
+        $query->whereHas('vehicle', fn (Builder $vehicles) => $vehicles->where('tenant_id', $tenant->id));
     }
 
     /**

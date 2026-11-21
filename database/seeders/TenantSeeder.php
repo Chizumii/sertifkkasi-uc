@@ -16,54 +16,54 @@ class TenantSeeder extends Seeder
     /**
      * Data penyewa demo dengan campuran status; hanya penyewa approved yang punya kendaraan.
      *
-     * @var list<array{nik: string, name: string, phone: string, email: string, status: UserStatus, vehicles: list<array{type: VehicleType, plate_number: string|null, brand_model: string, battery_capacity_kwh: float|null}>}>
+     * @var list<array{nik: string, full_name: string, phone_number: string, email: string, verification_status: UserStatus, vehicles: list<array{type: VehicleType, license_plate: string|null, brand_model: string, battery_kwh: float|null}>}>
      */
     private const array TENANTS = [
         [
             'nik' => '3578011203950002',
-            'name' => 'Budi Santoso',
-            'phone' => '081234567801',
+            'full_name' => 'Budi Santoso',
+            'phone_number' => '081234567801',
             'email' => 'budi@garasi.test',
-            'status' => UserStatus::Approved,
+            'verification_status' => UserStatus::Approved,
             'vehicles' => [
-                ['type' => VehicleType::Car, 'plate_number' => 'L 1234 AB', 'brand_model' => 'Toyota Avanza', 'battery_capacity_kwh' => null],
-                ['type' => VehicleType::ElectricCar, 'plate_number' => 'L 2024 EV', 'brand_model' => 'Hyundai Ioniq 5', 'battery_capacity_kwh' => 72.6],
-                ['type' => VehicleType::Bicycle, 'plate_number' => null, 'brand_model' => 'Polygon Xtrada 5', 'battery_capacity_kwh' => null],
+                ['type' => VehicleType::Car, 'license_plate' => 'L 1234 AB', 'brand_model' => 'Toyota Avanza', 'battery_kwh' => null],
+                ['type' => VehicleType::ElectricCar, 'license_plate' => 'L 2024 EV', 'brand_model' => 'Hyundai Ioniq 5', 'battery_kwh' => 72.6],
+                ['type' => VehicleType::Bicycle, 'license_plate' => null, 'brand_model' => 'Polygon Xtrada 5', 'battery_kwh' => null],
             ],
         ],
         [
             'nik' => '3578014507980003',
-            'name' => 'Siti Rahmawati',
-            'phone' => '081234567802',
+            'full_name' => 'Siti Rahmawati',
+            'phone_number' => '081234567802',
             'email' => 'siti@garasi.test',
-            'status' => UserStatus::Approved,
+            'verification_status' => UserStatus::Approved,
             'vehicles' => [
-                ['type' => VehicleType::Motorcycle, 'plate_number' => 'L 4321 XY', 'brand_model' => 'Honda Vario 125', 'battery_capacity_kwh' => null],
-                ['type' => VehicleType::ElectricCar, 'plate_number' => 'L 88 WEV', 'brand_model' => 'Wuling Air ev', 'battery_capacity_kwh' => 26.7],
+                ['type' => VehicleType::Motorcycle, 'license_plate' => 'L 4321 XY', 'brand_model' => 'Honda Vario 125', 'battery_kwh' => null],
+                ['type' => VehicleType::ElectricCar, 'license_plate' => 'L 88 WEV', 'brand_model' => 'Wuling Air ev', 'battery_kwh' => 26.7],
             ],
         ],
         [
             'nik' => '3578012009000004',
-            'name' => 'Andi Wijaya',
-            'phone' => '081234567803',
+            'full_name' => 'Andi Wijaya',
+            'phone_number' => '081234567803',
             'email' => 'andi@garasi.test',
-            'status' => UserStatus::Pending,
+            'verification_status' => UserStatus::Pending,
             'vehicles' => [],
         ],
         [
             'nik' => '3578016611010005',
-            'name' => 'Rina Kusuma',
-            'phone' => '081234567804',
+            'full_name' => 'Rina Kusuma',
+            'phone_number' => '081234567804',
             'email' => 'rina@garasi.test',
-            'status' => UserStatus::Pending,
+            'verification_status' => UserStatus::Pending,
             'vehicles' => [],
         ],
         [
             'nik' => '3578010302970006',
-            'name' => 'Dedi Pratama',
-            'phone' => '081234567805',
+            'full_name' => 'Dedi Pratama',
+            'phone_number' => '081234567805',
             'email' => 'dedi@garasi.test',
-            'status' => UserStatus::Rejected,
+            'verification_status' => UserStatus::Rejected,
             'vehicles' => [],
         ],
     ];
@@ -79,20 +79,19 @@ class TenantSeeder extends Seeder
             $tenant = User::query()->firstOrNew(['email' => $tenantData['email']]);
             $tenant->forceFill([
                 'nik' => $tenantData['nik'],
-                'name' => $tenantData['name'],
-                'phone' => $tenantData['phone'],
+                'full_name' => $tenantData['full_name'],
+                'phone_number' => $tenantData['phone_number'],
                 'password' => 'password',
                 'role' => UserRole::Tenant,
-                'status' => $tenantData['status'],
-                'email_verified_at' => now(),
+                'verification_status' => $tenantData['verification_status'],
             ])->save();
 
             foreach ($tenantData['vehicles'] as $vehicleData) {
                 $tenant->vehicles()->updateOrCreate(
                     ['type' => $vehicleData['type'], 'brand_model' => $vehicleData['brand_model']],
                     [
-                        'plate_number' => $vehicleData['plate_number'],
-                        'battery_capacity_kwh' => $vehicleData['battery_capacity_kwh'],
+                        'license_plate' => $vehicleData['license_plate'],
+                        'battery_kwh' => $vehicleData['battery_kwh'],
                     ],
                 );
             }

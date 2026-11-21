@@ -22,13 +22,12 @@ class AdminSeeder extends Seeder
         User::query()
             ->firstOrNew(['email' => 'admin@garasi.test'])
             ->forceFill([
-                'nik' => '3578010101900001',
-                'name' => 'Administrator',
-                'phone' => '081200000001',
+                'nik' => null,
+                'full_name' => 'Administrator',
+                'phone_number' => '081200000001',
                 'password' => 'password',
                 'role' => UserRole::Admin,
-                'status' => UserStatus::Approved,
-                'email_verified_at' => now(),
+                'verification_status' => UserStatus::Approved,
             ])
             ->save();
     }

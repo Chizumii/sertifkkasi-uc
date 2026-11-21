@@ -7,16 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Membuat tabel garages untuk garasi sepeda (S), mobil (C), dan mobil listrik (E).
+     * Membuat tabel garages. Primary key id berisi kode garasi: S/C/E + 3 digit (misalnya C001).
      */
     public function up(): void
     {
         Schema::create('garages', function (Blueprint $table) {
-            $table->id();
-            $table->char('code', 4)->unique();
-            $table->enum('type', ['bike', 'car', 'electric']);
-            $table->decimal('daily_price', 12, 2);
-            $table->decimal('kwh_price', 12, 2)->nullable();
+            $table->char('id', 4)->primary();
+            $table->enum('type', ['bicycle', 'car', 'electric']);
+            $table->unsignedInteger('daily_rate');
+            $table->unsignedInteger('kwh_rate')->nullable();
             $table->enum('status', ['available', 'used'])->default('available');
             $table->timestamps();
 
