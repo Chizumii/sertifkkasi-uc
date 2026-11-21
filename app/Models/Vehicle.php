@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\VehicleType;
+use Database\Factories\VehicleFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * Kendaraan milik penyewa (sepeda, sepeda motor, mobil, atau mobil listrik).
+ */
+#[Fillable(['user_id', 'type', 'plate_number', 'brand_model', 'battery_capacity_kwh'])]
+class Vehicle extends Model
+{
+    /** @use HasFactory<VehicleFactory> */
+    use HasFactory;
+
+    /**
+     * Mendapatkan atribut yang perlu di-cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'type' => VehicleType::class,
+            'battery_capacity_kwh' => 'decimal:2',
+        ];
+    }
+
+    /**
+     * Penyewa pemilik kendaraan.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Riwayat sewa yang menggunakan kendaraan ini.
+     *
+     * @return HasMany<Rental, $this>
+     */
+    public function rentals(): HasMany
+    {
+        return $this->hasMany(Rental::class);
+    }
+}
