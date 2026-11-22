@@ -10,13 +10,12 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-/**
- * Menyamakan status garasi dan status sewa dengan tanggal hari ini. Dijadwalkan tiap hari di routes/console.php.
- */
+// Command ini buat nyamain status garasi dan status sewa dengan tanggal hari ini. Jalan otomatis tiap hari jam 00:00 (diatur di routes/console.php).
 #[Signature('garages:sync-status')]
 #[Description('Menandai garasi used bila ada sewa aktif hari ini, selain itu available')]
 class SyncGarageStatus extends Command
 {
+    // Function ini buat ngejalanin sinkronisasi: garasi yang disewa hari ini jadi "used", sisanya "available".
     public function handle(): int
     {
         // Kode garasi yang sedang dipakai hari ini.
