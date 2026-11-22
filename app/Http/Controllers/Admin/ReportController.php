@@ -13,20 +13,17 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
-/**
- * Laporan pendapatan untuk admin.
- *
- * Pendapatan sewa = total_cost sewa (dihitung di tanggal mulai sewa).
- * Pendapatan perpanjangan = remaining_cost perpanjangan (dihitung di tanggal perpanjangan dibuat).
- *
- * Mode laporan:
- * - month : per bulan dalam satu tahun (12 baris)
- * - day   : per tanggal dalam satu bulan
- * - type  : per tipe garasi
- * - tenant: per penyewa
- */
+// Controller ini buat nampilin laporan pendapatan ke admin.
+// Pendapatan sewa = total_cost sewa (dihitung di tanggal mulai sewa).
+// Pendapatan perpanjangan = remaining_cost perpanjangan (dihitung di tanggal perpanjangan dibuat).
+// Mode laporan:
+// - month : per bulan dalam satu tahun (12 baris)
+// - day   : per tanggal dalam satu bulan
+// - type  : per tipe garasi
+// - tenant: per penyewa
 class ReportController extends Controller
 {
+    // Function ini buat nampilin laporan pendapatan sesuai pilihan mode, tahun, dan bulan.
     public function index(Request $request): View|RedirectResponse
     {
         $mode = $request->input('mode', 'month');
@@ -142,13 +139,7 @@ class ReportController extends Controller
         ]);
     }
 
-    /**
-     * Satu baris laporan: jumlah sewa, pendapatan sewa, pendapatan perpanjangan, dan totalnya.
-     *
-     * @param  Collection<int, Rental>  $rentals
-     * @param  Collection<int, RentalExtension>  $extensions
-     * @return array{label: string, rental_count: int, rental_revenue: int, extension_revenue: int, total: int}
-     */
+    // Function ini buat nyusun satu baris laporan: jumlah sewa, pendapatan sewa, pendapatan perpanjangan, dan totalnya.
     private function makeRow(string $label, Collection $rentals, Collection $extensions): array
     {
         $rentalRevenue = (int) $rentals->sum('total_cost');

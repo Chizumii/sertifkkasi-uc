@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\GarageStatus;
 use App\Enums\GarageType;
 use App\Enums\RentalType;
-use Database\Factories\GarageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,40 +12,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Garasi yang disewakan. Kolom id berisi kode garasi, misalnya S001 (sepeda), C001 (mobil), E001 (mobil listrik).
- */
+// Model ini buat data garasi yang disewakan (tabel garages).
+// Kolom id isinya kode garasi, misalnya S001 (sepeda), C001 (mobil), E001 (mobil listrik).
 #[Fillable(['id', 'type', 'daily_rate', 'kwh_rate', 'status'])]
 class Garage extends Model
 {
-    /** @use HasFactory<GarageFactory> */
     use HasFactory;
 
-    /**
-     * Harga sewa bulanan = 25 x harga harian.
-     */
+    // Angka pengali harga bulanan: harga sebulan = 25 x harga harian.
     public const int MONTHLY_PRICE_MULTIPLIER = 25;
 
-    /**
-     * Nomor kode garasi paling besar per tipe (S999, C999, E999).
-     */
+    // Nomor garasi paling besar untuk tiap jenis, jadi paling banyak sampai S999, C999, E999.
     public const int MAX_NUMBER = 999;
 
-    /**
-     * Primary key berupa kode garasi (teks), bukan angka berurutan.
-     *
-     * @var bool
-     */
+    // Id garasi itu kode teks (misalnya C001), bukan angka yang nambah otomatis.
     public $incrementing = false;
 
-    /**
-     * @var string
-     */
+    // Tipe id garasi adalah teks.
     protected $keyType = 'string';
 
-    /**
-     * @return array<string, string>
-     */
+    // Function ini buat ngubah kolom database ke tipe yang pas (enum, tanggal, angka) waktu datanya dibaca.
     protected function casts(): array
     {
         return [
@@ -57,27 +42,20 @@ class Garage extends Model
         ];
     }
 
-    /**
-     * Semua sewa di garasi ini.
-     *
-     * @return HasMany<Rental, $this>
-     */
+    // Function ini buat ngambil semua data sewa di garasi ini.
     public function rentals(): HasMany
     {
         return $this->hasMany(Rental::class, 'garage_code');
     }
 
-    /**
-     * Harga sewa satu bulan.
-     */
+    // Function ini buat ngitung harga sewa sebulan (25 x harga harian).
     public function monthlyPrice(): int
     {
         return $this->daily_rate * self::MONTHLY_PRICE_MULTIPLIER;
     }
 
-    /**
-     * Biaya sewa garasi: bulanan = harga bulanan, harian = jumlah hari x harga harian.
-     */
+    // Function ini buat ngitung biaya sewa garasi.
+    // Kalau bulanan pakai harga sebulan, kalau harian = jumlah hari x harga harian.
     public function rentalCost(int $days, RentalType $type): int
     {
         if ($type === RentalType::Monthly) {
@@ -87,10 +65,8 @@ class Garage extends Model
         return $days * $this->daily_rate;
     }
 
-    /**
-     * Cek apakah garasi kosong pada tanggal $start sampai sebelum $end.
-     * $exceptRentalId dipakai saat perpanjangan, supaya sewa yang sedang diperpanjang tidak dihitung bentrok.
-     */
+    // Function ini buat ngecek garasi kosong atau nggak dari tanggal $start sampai sebelum $end.
+    // $exceptRentalId dipakai waktu perpanjangan, supaya sewa yang lagi diperpanjang nggak dianggap bentrok sama dirinya sendiri.
     public function isFree(mixed $start, mixed $end, ?int $exceptRentalId = null): bool
     {
         $query = $this->rentals()->overlapping($start, $end);
@@ -102,9 +78,7 @@ class Garage extends Model
         return $query->doesntExist();
     }
 
-    /**
-     * Nomor kode tertinggi yang sudah dipakai untuk satu tipe. Contoh: ada C001-C009 maka hasilnya 9.
-     */
+    // Function ini buat nyari nomor garasi terbesar yang sudah dipakai untuk satu jenis. Contoh: ada C001-C009, hasilnya 9.
     public static function highestNumber(GarageType $type): int
     {
         $highestCode = self::query()->where('type', $type)->max('id');
@@ -116,19 +90,13 @@ class Garage extends Model
         return (int) substr($highestCode, 1);
     }
 
-    /**
-     * Menyusun kode garasi dari tipe dan nomor. Contoh: (Electric, 6) menjadi E006.
-     */
+    // Function ini buat nyusun kode garasi dari jenis dan nomornya. Contoh: mobil listrik nomor 6 jadi E006.
     public static function makeCode(GarageType $type, int $number): string
     {
         return $type->codePrefix().str_pad((string) $number, 3, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Filter garasi berdasarkan tipe.
-     *
-     * @param  Builder<Garage>  $query
-     */
+    // Function ini buat nyaring garasi supaya yang muncul cuma satu jenis saja.
     #[Scope]
     protected function ofType(Builder $query, GarageType $type): void
     {

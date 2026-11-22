@@ -15,18 +15,13 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Sewa garasi oleh penyewa.
- *
- * Alurnya 2 tahap:
- * 1. create(): penyewa memilih kendaraan, tanggal mulai, dan jumlah hari, lalu melihat garasi yang kosong.
- * 2. store(): penyewa memilih garasi, mengunggah bukti bayar, lalu sewa disimpan.
- */
+// Controller ini buat penyewa nyewa garasi dan lihat riwayat sewanya.
+// Alurnya 2 tahap:
+// 1. create(): penyewa memilih kendaraan, tanggal mulai, dan jumlah hari, lalu melihat garasi yang kosong.
+// 2. store(): penyewa memilih garasi, mengunggah bukti bayar, lalu sewa disimpan.
 class RentalController extends Controller
 {
-    /**
-     * Riwayat sewa milik penyewa, lengkap dengan bukti bayar sewa dan perpanjangan.
-     */
+    // Function ini buat nampilin riwayat sewa milik penyewa, lengkap dengan bukti bayar sewa dan perpanjangan.
     public function index(Request $request): View
     {
         $rentals = Rental::query()
@@ -39,9 +34,7 @@ class RentalController extends Controller
         return view('tenant.rentals.index', ['rentals' => $rentals]);
     }
 
-    /**
-     * Tahap 1: form sewa. Bila data periode sudah diisi, tampilkan garasi yang kosong beserta biayanya.
-     */
+    // Function ini buat tahap 1: nampilin form sewa. Kalau tanggal dan jumlah hari sudah diisi, garasi yang kosong beserta biayanya ikut tampil.
     public function create(Request $request): View|RedirectResponse
     {
         $user = $request->user();
@@ -100,9 +93,7 @@ class RentalController extends Controller
         return view('tenant.rentals.create', $data);
     }
 
-    /**
-     * Tahap 2: simpan sewa baru.
-     */
+    // Function ini buat tahap 2: nyimpen sewa baru setelah penyewa milih garasi dan upload bukti bayar.
     public function store(Request $request): RedirectResponse
     {
         $this->fillRentalType($request);
@@ -169,11 +160,9 @@ class RentalController extends Controller
             ->with('success', "Sewa garasi {$garage->id} berhasil disimpan.");
     }
 
-    /**
-     * Melengkapi tipe sewa dan jumlah hari sebelum validasi.
-     * - Bulanan: jumlah hari = jumlah hari di bulan tanggal mulai.
-     * - Tanpa tipe sewa: ditebak dari jumlah hari (sebulan penuh = bulanan).
-     */
+    // Function ini buat ngelengkapin jenis sewa dan jumlah hari sebelum dicek.
+    // - Bulanan: jumlah hari = jumlah hari di bulan tanggal mulai.
+    // - Tanpa tipe sewa: ditebak dari jumlah hari (sebulan penuh = bulanan).
     private function fillRentalType(Request $request): void
     {
         $startDate = $this->startDateFrom($request);
@@ -192,11 +181,7 @@ class RentalController extends Controller
         }
     }
 
-    /**
-     * Aturan validasi kendaraan dan periode (dipakai di tahap 1 dan tahap 2).
-     *
-     * @return array<string, mixed>
-     */
+    // Function ini buat ngasih aturan pengecekan kendaraan dan tanggal sewa (dipakai di tahap 1 dan tahap 2).
     private function periodRules(Request $request): array
     {
         $daysInMonth = ($this->startDateFrom($request) ?? today())->daysInMonth;
@@ -214,9 +199,7 @@ class RentalController extends Controller
         ];
     }
 
-    /**
-     * Tanggal mulai dari input, atau null bila kosong / formatnya salah.
-     */
+    // Function ini buat ngambil tanggal mulai dari form. Hasilnya null kalau kosong atau formatnya salah.
     private function startDateFrom(Request $request): ?Carbon
     {
         $input = (string) $request->input('start_date');
@@ -228,11 +211,7 @@ class RentalController extends Controller
         return Carbon::createFromFormat('Y-m-d', $input)->startOfDay();
     }
 
-    /**
-     * Pesan error validasi dalam bahasa Indonesia.
-     *
-     * @return array<string, string>
-     */
+    // Function ini buat ngasih pesan error validasi dalam bahasa Indonesia.
     private function messages(Request $request): array
     {
         $daysInMonth = ($this->startDateFrom($request) ?? today())->daysInMonth;
@@ -257,11 +236,7 @@ class RentalController extends Controller
         ];
     }
 
-    /**
-     * Nama field dalam bahasa Indonesia (dipakai di :Attribute).
-     *
-     * @return array<string, string>
-     */
+    // Function ini buat ngasih nama isian form dalam bahasa Indonesia (dipakai di pesan error).
     private function attributeNames(): array
     {
         return [

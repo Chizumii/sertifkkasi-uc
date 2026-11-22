@@ -7,17 +7,10 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Membatasi route hanya untuk role tertentu (alias: role). Contoh: middleware('role:admin').
- */
+// Middleware ini buat ngebatasin halaman supaya cuma bisa dibuka peran tertentu (nama pendeknya: role). Contoh: middleware('role:admin').
 class EnsureUserHasRole
 {
-    /**
-     * Meneruskan request bila role pengguna sesuai, selain itu menghentikan dengan 403.
-     *
-     * @param  Closure(Request): (Response)  $next
-     * @param  string  $role  Nilai enum UserRole, yaitu admin atau tenant.
-     */
+    // Function ini buat ngelanjutin ke halaman tujuan kalau perannya cocok. Kalau nggak cocok, ditolak dengan error 403.
     public function handle(Request $request, Closure $next, string $role): Response
     {
         $user = $request->user();

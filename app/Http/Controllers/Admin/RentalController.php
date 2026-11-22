@@ -10,33 +10,29 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
-/**
- * Sewa untuk admin: tabel sewa aktif hari ini dan form perpanjangan.
- */
+// Controller ini buat admin ngelola sewa: lihat sewa yang berjalan dan yang akan datang, lalu memperpanjangnya.
 class RentalController extends Controller
 {
-    /**
-     * Tabel sewa yang berjalan hari ini, lengkap dengan bukti bayar.
-     */
+    // Function ini buat nampilin tabel sewa yang lagi berjalan dan yang akan datang, lengkap dengan bukti bayar.
+    // Sewa yang sudah selesai nggak ditampilkan.
     public function index(): View
     {
         $rentals = Rental::query()
-            ->activeOn(today())
+            ->where('end_date', '>', today())
             ->with(['garage', 'vehicle.tenant', 'extensions'])
+            ->orderBy('start_date')
             ->orderBy('end_date')
             ->paginate(15);
 
         return view('admin.rentals.index', ['rentals' => $rentals]);
     }
 
-    /**
-     * Form perpanjangan. Bila tanggal selesai baru sudah diisi, tampilkan rincian biayanya.
-     */
+    // Function ini buat nampilin form perpanjangan. Kalau tanggal selesai baru sudah diisi, rincian biayanya ikut tampil.
     public function extend(Request $request, Rental $rental): View|RedirectResponse
     {
-        if (! $rental->isActiveToday()) {
+        if ($rental->isFinished()) {
             return redirect()->route('admin.rentals.index')
-                ->with('error', 'Hanya sewa yang aktif hari ini yang bisa diperpanjang.');
+                ->with('error', 'Sewa yang sudah selesai tidak bisa diperpanjang.');
         }
 
         $preview = null;
@@ -66,9 +62,7 @@ class RentalController extends Controller
         ]);
     }
 
-    /**
-     * Simpan perpanjangan: catat di rental_extensions, lalu ubah tanggal selesai sewa.
-     */
+    // Function ini buat nyimpen perpanjangan: dicatat di rental_extensions, lalu tanggal selesai sewa diganti.
     public function storeExtension(Request $request, Rental $rental): RedirectResponse
     {
         $request->validate([
@@ -79,8 +73,8 @@ class RentalController extends Controller
             'payment_proof' => 'bukti bayar',
         ]);
 
-        if (! $rental->isActiveToday()) {
-            return back()->withInput()->withErrors(['new_end_date' => 'Hanya sewa yang aktif hari ini yang bisa diperpanjang.']);
+        if ($rental->isFinished()) {
+            return back()->withInput()->withErrors(['new_end_date' => 'Sewa yang sudah selesai tidak bisa diperpanjang.']);
         }
 
         $newEndDate = Carbon::createFromFormat('Y-m-d', $request->input('new_end_date'))->startOfDay();
@@ -107,10 +101,8 @@ class RentalController extends Controller
             ->with('success', 'Sewa diperpanjang sampai '.$newEndDate->translatedFormat('j F Y').'.');
     }
 
-    /**
-     * Cek periode tambahan (tanggal selesai lama sampai tanggal selesai baru).
-     * Mengembalikan pesan error, atau null bila aman diperpanjang.
-     */
+    // Function ini buat ngecek tanggal tambahan bentrok atau nggak (garasi dan kendaraannya).
+    // Hasilnya pesan error kalau bentrok, atau null kalau aman diperpanjang.
     private function checkExtension(Rental $rental, Carbon $newEndDate): ?string
     {
         $garage = $rental->garage;
@@ -127,11 +119,7 @@ class RentalController extends Controller
         return null;
     }
 
-    /**
-     * Pesan error validasi dalam bahasa Indonesia.
-     *
-     * @return array<string, string>
-     */
+    // Function ini buat ngasih pesan error validasi dalam bahasa Indonesia.
     private function messages(Rental $rental): array
     {
         return [

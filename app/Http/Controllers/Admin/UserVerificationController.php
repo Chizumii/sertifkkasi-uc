@@ -10,14 +10,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/**
- * Verifikasi pendaftar: admin menerima atau menolak penyewa. Keputusan bersifat final.
- */
+// Controller ini buat admin nerima atau nolak pendaftar penyewa. Keputusannya final, nggak bisa diubah lagi.
 class UserVerificationController extends Controller
 {
-    /**
-     * Daftar penyewa. Bawaan menampilkan yang pending; ?status=all untuk semua.
-     */
+    // Function ini buat nampilin daftar pendaftar. Awalnya yang menunggu dulu, bisa difilter per status atau semua.
     public function index(Request $request): View
     {
         $status = UserStatus::tryFrom((string) $request->query('status', 'pending'));
@@ -45,25 +41,19 @@ class UserVerificationController extends Controller
         ]);
     }
 
-    /**
-     * Terima pendaftaran penyewa.
-     */
+    // Function ini buat nerima pendaftaran penyewa.
     public function approve(User $user): RedirectResponse
     {
         return $this->changeStatus($user, UserStatus::Approved, "Pendaftaran {$user->full_name} diterima.");
     }
 
-    /**
-     * Tolak pendaftaran penyewa.
-     */
+    // Function ini buat nolak pendaftaran penyewa.
     public function reject(User $user): RedirectResponse
     {
         return $this->changeStatus($user, UserStatus::Rejected, "Pendaftaran {$user->full_name} ditolak.");
     }
 
-    /**
-     * Ubah status pendaftar. Akun admin tidak boleh diubah, dan hanya pendaftar pending yang bisa diputuskan.
-     */
+    // Function ini buat ngubah status pendaftar. Akun admin nggak boleh diubah, dan cuma pendaftar yang masih menunggu yang bisa diputuskan.
     private function changeStatus(User $user, UserStatus $newStatus, string $message): RedirectResponse
     {
         if ($user->isAdmin()) {

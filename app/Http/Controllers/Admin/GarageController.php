@@ -11,14 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Daftar garasi dan pembuatan banyak garasi sekaligus oleh admin.
- */
+// Controller ini buat admin ngelola garasi: lihat daftar garasi dan bikin banyak garasi sekaligus.
 class GarageController extends Controller
 {
-    /**
-     * Daftar garasi (bisa difilter per tipe) dan jumlah garasi per tipe.
-     */
+    // Function ini buat nampilin daftar garasi (bisa difilter per jenis) dan jumlah garasi tiap jenis.
     public function index(Request $request): View
     {
         $type = GarageType::tryFrom((string) $request->query('type'));
@@ -46,9 +42,7 @@ class GarageController extends Controller
         ]);
     }
 
-    /**
-     * Form buat garasi, beserta kode berikutnya dan sisa kuota tiap tipe.
-     */
+    // Function ini buat nampilin form tambah garasi, lengkap dengan kode berikutnya dan sisa kuota tiap jenis.
     public function create(): View
     {
         $nextCodes = [];
@@ -67,9 +61,7 @@ class GarageController extends Controller
         ]);
     }
 
-    /**
-     * Buat garasi berurutan melanjutkan kode terakhir. Contoh: sudah ada E005, tambah 2 jadi E006 dan E007.
-     */
+    // Function ini buat nyimpen garasi baru dengan kode lanjutan dari yang terakhir. Contoh: sudah ada E005, tambah 2 jadi E006 dan E007.
     public function store(Request $request): RedirectResponse
     {
         $request->validate([

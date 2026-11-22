@@ -9,7 +9,7 @@
 
 @section('content')
     <x-page-header :title="'Perpanjang sewa '.$rental->garage->id" description="Tidak ada batas hari. Biaya hanya untuk hari tambahan setelah tanggal selesai sekarang.">
-        <x-button variant="secondary" :href="route('admin.rentals.index')">Kembali ke sewa aktif</x-button>
+        <x-button variant="secondary" :href="route('admin.rentals.index')">Kembali ke daftar sewa</x-button>
     </x-page-header>
 
     <x-form-errors />

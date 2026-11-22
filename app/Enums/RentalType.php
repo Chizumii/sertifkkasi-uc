@@ -2,17 +2,13 @@
 
 namespace App\Enums;
 
-/**
- * Jenis sewa garasi: harian atau bulanan.
- */
+// Enum ini buat nyimpen jenis sewa: harian atau bulanan.
 enum RentalType: string
 {
     case Daily = 'daily';
     case Monthly = 'monthly';
 
-    /**
-     * Label jenis sewa untuk ditampilkan di antarmuka.
-     */
+    // Function ini buat ngasih nama jenis sewa dalam bahasa Indonesia yang tampil di layar.
     public function label(): string
     {
         return match ($this) {

@@ -12,26 +12,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-/**
- * Pendaftaran penyewa baru. Akun baru berstatus pending sampai diverifikasi admin.
- */
+// Controller ini buat pendaftaran penyewa baru. Akun baru statusnya menunggu sampai diperiksa admin.
 class RegisterController extends Controller
 {
-    /**
-     * Form pendaftaran.
-     */
+    // Function ini buat nampilin form pendaftaran.
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Simpan akun penyewa baru, login otomatis, lalu tampilkan halaman status.
-     *
-     * Penyewa yang pernah ditolak boleh daftar ulang dengan NIK/email yang sama:
-     * akun lama yang ditolak (dan belum pernah menyewa) dihapus dulu.
-     * Semua dijalankan dalam transaksi, jadi bila validasi gagal, akun lama tidak jadi terhapus.
-     */
+    // Function ini buat nyimpen akun penyewa baru, langsung login, lalu nampilin halaman status.
+    // Penyewa yang pernah ditolak boleh daftar ulang pakai NIK/email yang sama:
+    // akun lama yang ditolak (dan belum pernah nyewa) dihapus dulu.
+    // Semuanya dijalankan dalam transaksi, jadi kalau validasi gagal, akun lama nggak jadi kehapus.
     public function store(Request $request): RedirectResponse
     {
         // Rapikan input: buang spasi di NIK dan nomor telepon, email huruf kecil.

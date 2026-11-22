@@ -2,17 +2,13 @@
 
 namespace App\Enums;
 
-/**
- * Status ketersediaan garasi.
- */
+// Enum ini buat nyimpen status garasi: masih kosong (available) atau lagi dipakai (used).
 enum GarageStatus: string
 {
     case Available = 'available';
     case Used = 'used';
 
-    /**
-     * Label status untuk ditampilkan di antarmuka.
-     */
+    // Function ini buat ngasih nama status garasi dalam bahasa Indonesia yang tampil di layar.
     public function label(): string
     {
         return match ($this) {

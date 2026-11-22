@@ -2,18 +2,14 @@
 
 namespace App\Enums;
 
-/**
- * Status verifikasi pendaftaran pengguna oleh admin.
- */
+// Enum ini buat nyimpen status pendaftaran penyewa: menunggu, diterima, atau ditolak admin.
 enum UserStatus: string
 {
     case Pending = 'pending';
     case Approved = 'approved';
     case Rejected = 'rejected';
 
-    /**
-     * Label status untuk ditampilkan di antarmuka.
-     */
+    // Function ini buat ngasih nama status pendaftaran dalam bahasa Indonesia yang tampil di layar.
     public function label(): string
     {
         return match ($this) {

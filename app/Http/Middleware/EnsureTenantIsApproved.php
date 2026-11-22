@@ -6,16 +6,10 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Memastikan penyewa sudah diterima admin sebelum mengelola kendaraan atau menyewa (alias: approved).
- */
+// Middleware ini buat mastiin penyewa sudah diterima admin sebelum boleh nambah kendaraan atau nyewa (nama pendeknya: approved).
 class EnsureTenantIsApproved
 {
-    /**
-     * Meneruskan request bila pengguna berstatus approved, selain itu ke halaman status pendaftaran dengan pesan.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
+    // Function ini buat ngelanjutin ke halaman tujuan kalau penyewa sudah diterima. Kalau belum, dialihkan ke halaman status pendaftaran.
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user()?->isApproved()) {

@@ -2,9 +2,7 @@
 
 namespace App\Enums;
 
-/**
- * Tipe kendaraan milik penyewa.
- */
+// Enum ini buat nyimpen jenis kendaraan: sepeda, sepeda motor, mobil, atau mobil listrik.
 enum VehicleType: string
 {
     case Bicycle = 'bicycle';
@@ -12,9 +10,7 @@ enum VehicleType: string
     case Car = 'car';
     case ElectricCar = 'electricCar';
 
-    /**
-     * Label tipe kendaraan untuk ditampilkan di antarmuka.
-     */
+    // Function ini buat ngasih nama jenis kendaraan dalam bahasa Indonesia yang tampil di layar.
     public function label(): string
     {
         return match ($this) {
@@ -25,19 +21,14 @@ enum VehicleType: string
         };
     }
 
-    /**
-     * Menentukan apakah tipe kendaraan ini memiliki kapasitas baterai.
-     */
+    // Function ini buat ngecek kendaraan ini punya baterai atau nggak (cuma mobil listrik yang punya).
     public function hasBattery(): bool
     {
         return $this === self::ElectricCar;
     }
 
-    /**
-     * Daftar tipe garasi yang boleh ditempati oleh tipe kendaraan ini.
-     *
-     * @return list<GarageType>
-     */
+    // Function ini buat ngasih daftar garasi yang boleh dipakai kendaraan ini.
+    // Sepeda dan motor di garasi sepeda, mobil di garasi mobil, mobil listrik boleh di garasi mobil atau garasi listrik.
     public function allowedGarageTypes(): array
     {
         return match ($this) {

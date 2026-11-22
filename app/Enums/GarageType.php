@@ -2,18 +2,14 @@
 
 namespace App\Enums;
 
-/**
- * Tipe garasi beserta prefiks kode garasinya.
- */
+// Enum ini buat nyimpen jenis garasi: sepeda, mobil, atau mobil listrik.
 enum GarageType: string
 {
     case Bicycle = 'bicycle';
     case Car = 'car';
     case Electric = 'electric';
 
-    /**
-     * Huruf prefiks kode garasi (S, C, atau E).
-     */
+    // Function ini buat ngasih huruf depan kode garasi: S untuk sepeda, C untuk mobil, E untuk mobil listrik.
     public function codePrefix(): string
     {
         return match ($this) {
@@ -23,9 +19,7 @@ enum GarageType: string
         };
     }
 
-    /**
-     * Label tipe garasi untuk ditampilkan di antarmuka.
-     */
+    // Function ini buat ngasih nama jenis garasi dalam bahasa Indonesia yang tampil di layar.
     public function label(): string
     {
         return match ($this) {

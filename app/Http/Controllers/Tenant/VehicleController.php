@@ -8,17 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-/**
- * Menambah kendaraan penyewa dari form ringkas di halaman Sewa Garasi.
- */
+// Controller ini buat penyewa nambah kendaraan dari form di halaman Sewa Garasi.
 class VehicleController extends Controller
 {
-    /**
-     * Simpan kendaraan baru lalu kembali ke form sewa dengan kendaraan itu terpilih.
-     *
-     * - Nomor plat wajib, kecuali sepeda. Plat dirapikan jadi huruf besar dengan satu spasi.
-     * - Kapasitas baterai hanya untuk mobil listrik.
-     */
+    // Function ini buat nyimpen kendaraan baru, lalu balik ke form sewa dengan kendaraan itu langsung terpilih.
+    // - Nomor plat wajib, kecuali sepeda. Plat dirapikan jadi huruf besar dengan satu spasi.
+    // - Kapasitas baterai hanya untuk mobil listrik.
     public function store(Request $request): RedirectResponse
     {
         // Rapikan plat: "  l   9999  zz " menjadi "L 9999 ZZ".
